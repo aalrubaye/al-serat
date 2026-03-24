@@ -1,11 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 export default function Header() {
-  const searchParams = useSearchParams()
-  const query = searchParams.get('q') || ''
+  const [query, setQuery] = useState('')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setQuery(params.get('q') || '')
+  }, [])
 
   return (
     <header className="header">

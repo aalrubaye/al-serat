@@ -1,13 +1,23 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const activeFilter = pathname === '/' ? searchParams.get('type') || 'all' : 'all'
+  const [activeFilter, setActiveFilter] = useState('all')
   const showHomeFilter = pathname === '/'
+
+  useEffect(() => {
+    if (pathname !== '/') {
+      setActiveFilter('all')
+      return
+    }
+
+    const params = new URLSearchParams(window.location.search)
+    setActiveFilter(params.get('type') || 'all')
+  }, [pathname])
 
   const links = [
     { href: '/', label: 'الرئيسية', active: pathname === '/' },
