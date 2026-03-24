@@ -4,6 +4,8 @@ import Header from '../../components/Header'
 import Sidebar from '../../components/Sidebar'
 import PublicBackButton from '../../components/PublicBackButton'
 
+export const dynamic = 'force-dynamic'
+
 function formatArabicNumber(value) {
   return new Intl.NumberFormat('ar-u-nu-arab').format(value)
 }

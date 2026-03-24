@@ -4,6 +4,8 @@ import Sidebar from '../components/Sidebar'
 import FeaturedCard from '../components/FeaturedCard'
 import LoadMoreArticleGrid from '../components/LoadMoreArticleGrid'
 
+export const dynamic = 'force-dynamic'
+
 const FEATURED_TAG = '__featured__'
 const HOME_FILTER_LIMIT = 10
 const HOME_FETCH_LIMIT = 60

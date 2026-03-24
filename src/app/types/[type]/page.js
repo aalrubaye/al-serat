@@ -4,6 +4,8 @@ import Sidebar from '../../../components/Sidebar'
 import ArticleCard from '../../../components/ArticleCard'
 import PublicBackButton from '../../../components/PublicBackButton'
 
+export const dynamic = 'force-dynamic'
+
 function getTypeLabel(type) {
   return type === 'video' ? 'فيديو' : 'مقال'
 }

@@ -5,6 +5,8 @@ import PublishArticleButton from '../../../components/PublishArticleButton'
 import FeatureArticleButton from '../../../components/FeatureArticleButton'
 import AdminLogoutButton from '../../../components/AdminLogoutButton'
 
+export const dynamic = 'force-dynamic'
+
 const FEATURED_TAG = '__featured__'
 
 function formatGregorianDate(date) {

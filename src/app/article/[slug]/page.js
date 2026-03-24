@@ -8,6 +8,8 @@ import ArticleCard from '../../../components/ArticleCard'
 import PublicBackButton from '../../../components/PublicBackButton'
 import PrintButton from '../../../components/PrintButton'
 
+export const dynamic = 'force-dynamic'
+
 const INTERNAL_TAGS = ['__featured__']
 
 function extractYoutubeThumbnail(html) {
