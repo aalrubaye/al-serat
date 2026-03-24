@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabase'
 import Header from '../../components/Header'
 import Sidebar from '../../components/Sidebar'
 import LoadMoreArticleGrid from '../../components/LoadMoreArticleGrid'
@@ -25,27 +24,22 @@ export default function BookmarksPage() {
         return
       }
 
-      const { data: topics } = await supabase
-        .from('topics')
-        .select('id, name')
+      const response = await fetch('/api/bookmarks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids }),
+      })
 
-      const topicMap = Object.fromEntries(
-        (topics || []).map((topic) => [topic.id, topic.name])
-      )
+      if (!response.ok) {
+        setArticles([])
+        setLoading(false)
+        return
+      }
 
-      const { data } = await supabase
-        .from('articles')
-        .select('id, title, slug, summary, content, created_at, topic_id, image, content_type, status, tags')
-        .in('id', ids)
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-
-      const enriched = (data || []).map((article) => ({
-        ...article,
-        topic_name: topicMap[article.topic_id] || '',
-      }))
-
-      setArticles(enriched)
+      const payload = await response.json()
+      setArticles(Array.isArray(payload.articles) ? payload.articles : [])
       setLoading(false)
     }
 
