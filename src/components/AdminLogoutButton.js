@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../lib/supabase'
 
 export default function AdminLogoutButton() {
   const router = useRouter()
@@ -11,7 +10,9 @@ export default function AdminLogoutButton() {
   async function handleLogout() {
     setLoading(true)
 
-    await supabase.auth.signOut()
+    await fetch('/api/admin/session', {
+      method: 'DELETE',
+    })
 
     setLoading(false)
     router.push('/admin/login')

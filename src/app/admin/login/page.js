@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '../../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
 export default function AdminLoginPage() {
@@ -17,19 +16,27 @@ export default function AdminLoginPage() {
     setError('')
     setLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const res = await fetch('/api/admin/session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
     })
 
     setLoading(false)
 
-    if (error) {
-      setError('فشل تسجيل الدخول، تأكد من البريد الإلكتروني وكلمة المرور')
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setError(data.error || 'فشل تسجيل الدخول، تأكد من البريد الإلكتروني وكلمة المرور')
       return
     }
 
     router.push('/admin/dashboard')
+    router.refresh()
   }
 
   return (

@@ -48,11 +48,12 @@ export default function FeaturedCard({ article }) {
     extractYoutubeThumbnail(article.content) ||
     extractFirstImage(article.content)
 
-  const visibleTags = (Array.isArray(article.tags) ? article.tags : [])
+  const allVisibleTags = (Array.isArray(article.tags) ? article.tags : [])
     .map((tag) => String(tag || '').trim())
     .filter(Boolean)
     .filter((tag) => !INTERNAL_TAGS.includes(tag))
-    .slice(0, 3)
+  const visibleTags = allVisibleTags.slice(0, 3)
+  const remainingTagCount = Math.max(allVisibleTags.length - visibleTags.length, 0)
 
   const gregorianDate = useMemo(
     () => formatGregorianDate(article.created_at),
@@ -114,6 +115,12 @@ export default function FeaturedCard({ article }) {
                 {tag}
               </Link>
             ))}
+
+            {remainingTagCount > 0 && (
+              <span className="featured-card-tag-btn article-card-tag-overflow">
+                +{remainingTagCount}
+              </span>
+            )}
           </div>
         )}
 

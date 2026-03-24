@@ -3305,6 +3305,11 @@ html[data-theme='dark'] .featured-type:hover {
   box-shadow: 0 8px 20px rgba(10, 28, 18, 0.32);
 }
 
+.article-card-tag-overflow {
+  cursor: default;
+  pointer-events: none;
+}
+
 @media (max-width: 640px) {
   .featured-card-tags {
     padding: 0 18px 14px;

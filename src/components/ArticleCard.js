@@ -60,6 +60,7 @@ export default function ArticleCard({
   showFooter = true,
   className = '',
 }) {
+  const tagLimit = compact ? 3 : 2
   const router = useRouter()
   const [isPortraitImage, setIsPortraitImage] = useState(false)
 
@@ -72,11 +73,12 @@ export default function ArticleCard({
   const thumbnail = getThumbnail(article)
   const summary = article.summary ? String(article.summary).trim() : ''
 
-  const visibleTags = (Array.isArray(article.tags) ? article.tags : [])
+  const allVisibleTags = (Array.isArray(article.tags) ? article.tags : [])
     .map((tag) => String(tag || '').trim())
     .filter(Boolean)
     .filter((tag) => !INTERNAL_TAGS.includes(tag))
-    .slice(0, 3)
+  const visibleTags = allVisibleTags.slice(0, tagLimit)
+  const remainingTagCount = Math.max(allVisibleTags.length - visibleTags.length, 0)
 
   const gregorianDate = useMemo(
     () => formatGregorianDate(article.created_at),
@@ -137,6 +139,12 @@ export default function ArticleCard({
                 {tag}
               </button>
             ))}
+
+            {remainingTagCount > 0 && (
+              <span className="article-card-tag-btn article-card-tag-overflow">
+                +{remainingTagCount}
+              </span>
+            )}
           </div>
         )}
 
