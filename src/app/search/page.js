@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase'
+import { supabaseAdmin } from '../../lib/supabaseAdmin'
 import Header from '../../components/Header'
 import Sidebar from '../../components/Sidebar'
 import ArticleCard from '../../components/ArticleCard'
@@ -93,7 +93,7 @@ export default async function SearchPage({ searchParams }) {
   const { q = '' } = await searchParams
   const query = String(q || '').trim()
 
-  const { data: topics } = await supabase
+  const { data: topics } = await supabaseAdmin
     .from('topics')
     .select('id, name')
 
@@ -101,7 +101,7 @@ export default async function SearchPage({ searchParams }) {
     (topics || []).map((topic) => [topic.id, topic.name])
   )
 
-  const { data: publishedArticles } = await supabase
+  const { data: publishedArticles } = await supabaseAdmin
     .from('articles')
     .select('id, title, slug, summary, content, created_at, topic_id, image, status, tags, content_type')
     .eq('status', 'published')

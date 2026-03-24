@@ -1,4 +1,4 @@
-import { supabase } from '../../../lib/supabase'
+import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import Header from '../../../components/Header'
 import Sidebar from '../../../components/Sidebar'
 import Link from 'next/link'
@@ -59,7 +59,7 @@ function toAbsoluteUrl(path) {
 }
 
 async function getPublishedArticle(slug) {
-  const { data: article } = await supabase
+  const { data: article } = await supabaseAdmin
     .from('articles')
     .select('*')
     .eq('slug', slug)
@@ -138,7 +138,7 @@ export default async function ArticlePage({ params }) {
     )
   }
 
-  const { data: sameTopicArticles } = await supabase
+  const { data: sameTopicArticles } = await supabaseAdmin
     .from('articles')
     .select('*')
     .eq('status', 'published')
@@ -153,7 +153,7 @@ export default async function ArticlePage({ params }) {
   if (similarArticles.length < 3) {
     const excludedIds = [article.id, ...similarArticles.map((item) => item.id)]
 
-    let fallbackQuery = supabase
+    let fallbackQuery = supabaseAdmin
       .from('articles')
       .select('*')
       .eq('status', 'published')
@@ -183,7 +183,7 @@ export default async function ArticlePage({ params }) {
   let topicNamesById = {}
 
   if (topicIds.length > 0) {
-    const { data: topics } = await supabase
+    const { data: topics } = await supabaseAdmin
       .from('topics')
       .select('id, name')
       .in('id', topicIds)

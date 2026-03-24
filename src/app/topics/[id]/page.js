@@ -1,4 +1,4 @@
-import { supabase } from '../../../lib/supabase'
+import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import Header from '../../../components/Header'
 import Sidebar from '../../../components/Sidebar'
 import LoadMoreArticleGrid from '../../../components/LoadMoreArticleGrid'
@@ -13,7 +13,7 @@ function formatArabicNumber(value) {
 export default async function TopicDetails({ params }) {
   const { id } = await params
 
-  const { data: topic } = await supabase
+  const { data: topic } = await supabaseAdmin
     .from('topics')
     .select('*')
     .eq('id', id)
@@ -33,7 +33,7 @@ export default async function TopicDetails({ params }) {
     )
   }
 
-  const { data: articles } = await supabase
+  const { data: articles } = await supabaseAdmin
     .from('articles')
     .select('*')
     .eq('topic_id', topic.id)

@@ -1,4 +1,4 @@
-import { supabase } from '../../../lib/supabase'
+import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import Link from 'next/link'
 import DeleteArticleButton from '../../../components/DeleteArticleButton'
 import PublishArticleButton from '../../../components/PublishArticleButton'
@@ -36,7 +36,7 @@ function getStatusClass(status) {
 }
 
 export default async function AdminDashboardPage() {
-  const { data: articles, error } = await supabase
+  const { data: articles, error } = await supabaseAdmin
     .from('articles')
     .select('id, title, status, created_at, tags')
     .order('created_at', { ascending: false })

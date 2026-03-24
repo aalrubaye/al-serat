@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { supabaseAdmin } from '../lib/supabaseAdmin'
 import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
 import FeaturedCard from '../components/FeaturedCard'
@@ -18,13 +18,13 @@ export default async function HomePage({ searchParams }) {
   const params = await searchParams
   const activeFilter = normalizeHomeFilter(params?.type)
 
-  const { data: topics } = await supabase
+  const { data: topics } = await supabaseAdmin
     .from('topics')
     .select('id, name')
 
   const topicMap = Object.fromEntries((topics || []).map((topic) => [topic.id, topic.name]))
 
-  const { data: articles } = await supabase
+  const { data: articles } = await supabaseAdmin
     .from('articles')
     .select('id, title, slug, summary, content, created_at, topic_id, image, status, tags, content_type')
     .eq('status', 'published')

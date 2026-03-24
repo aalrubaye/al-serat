@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase'
+import { supabaseAdmin } from '../../lib/supabaseAdmin'
 import Link from 'next/link'
 import Header from '../../components/Header'
 import Sidebar from '../../components/Sidebar'
@@ -15,12 +15,12 @@ function getCountLabel(count, singular, plural) {
 }
 
 export default async function TopicsPage() {
-  const { data: topics } = await supabase
+  const { data: topics } = await supabaseAdmin
     .from('topics')
     .select('id, name')
     .order('name', { ascending: true })
 
-  const { data: articles } = await supabase
+  const { data: articles } = await supabaseAdmin
     .from('articles')
     .select('topic_id, content_type, title, created_at')
     .eq('status', 'published')
