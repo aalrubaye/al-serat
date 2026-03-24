@@ -1,23 +1,14 @@
 'use client'
 
+import { Suspense } from 'react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 
-export default function Sidebar() {
+function SidebarContent() {
   const pathname = usePathname()
-  const [activeFilter, setActiveFilter] = useState('all')
+  const searchParams = useSearchParams()
+  const activeFilter = pathname === '/' ? searchParams.get('type') || 'all' : 'all'
   const showHomeFilter = pathname === '/'
-
-  useEffect(() => {
-    if (pathname !== '/') {
-      setActiveFilter('all')
-      return
-    }
-
-    const params = new URLSearchParams(window.location.search)
-    setActiveFilter(params.get('type') || 'all')
-  }, [pathname])
 
   const links = [
     { href: '/', label: 'الرئيسية', active: pathname === '/' },
@@ -76,5 +67,13 @@ export default function Sidebar() {
         </div>
       </div>
     </aside>
+  )
+}
+
+export default function Sidebar() {
+  return (
+    <Suspense fallback={<aside className="sidebar" />}>
+      <SidebarContent />
+    </Suspense>
   )
 }

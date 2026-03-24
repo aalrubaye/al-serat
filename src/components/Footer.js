@@ -6,8 +6,6 @@ export default function Footer() {
       <div className="site-footer-inner">
         <div className="site-footer-copy">
           <span className="site-footer-copy-ar">جميع الحقوق محفوظة لموقع الصراط © 2006</span>
-          <span className="site-footer-separator">-</span>
-          <span className="site-footer-copy-en">al-serat.com</span>
         </div>
 
         <div className="site-footer-actions">
