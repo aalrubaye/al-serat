@@ -16,7 +16,7 @@ export default function Header() {
       <div className="header-inner">
         <Link href="/" className="logo">
           <img
-            src="/logo_banner.png"
+            src="/icon.png"
             alt="شعار الصراط"
             className="logo-banner-mark"
           />

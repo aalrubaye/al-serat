@@ -19,6 +19,11 @@ const headingFont = Readex_Pro({
 export const metadata = {
   title: 'الصراط | Al-Serat',
   description: 'موقع الصراط',
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/apple-icon.png',
+  },
 }
 
 export default function RootLayout({ children }) {
