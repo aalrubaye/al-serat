@@ -9,6 +9,11 @@ import TagsInput from '../../../../components/TagsInput'
 import AdminLogoutButton from '../../../../components/AdminLogoutButton'
 import AdminBackLink from '../../../../components/AdminBackLink'
 import { toEnglishSlug } from '../../../../lib/slugify'
+import {
+  normalizeEditorContentImages,
+  normalizeThumbnailImage,
+  uploadAdminMediaFile,
+} from '../../../../lib/adminMediaUpload'
 
 const FEATURED_TAG = '__featured__'
 
@@ -108,17 +113,14 @@ export default function EditArticlePage() {
   async function handleThumbnailFileChange(event) {
     const file = event.target.files?.[0]
     if (!file) return
-
-    const reader = new FileReader()
-
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setThumbnailImage(reader.result)
-      }
-    }
-
-    reader.readAsDataURL(file)
     event.target.value = ''
+
+    try {
+      const uploadedUrl = await uploadAdminMediaFile(file, 'thumbnails')
+      setThumbnailImage(uploadedUrl)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'تعذر رفع الصورة')
+    }
   }
 
   async function updateArticle(status) {
@@ -141,45 +143,55 @@ export default function EditArticlePage() {
 
     setLoading(true)
 
-    const res = await fetch(`/admin/update/${id}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        title: title.trim(),
-        slug: effectiveSlug,
-        summary: summary.trim(),
-        image: thumbnailImage.trim(),
-        content,
-        topic_id: topicId || null,
-        tags: tags,
-        status,
-        contentType,
-      }),
-    })
+    try {
+      const normalizedContent = await normalizeEditorContentImages(content)
+      const normalizedThumbnail = await normalizeThumbnailImage(thumbnailImage.trim())
 
-    const data = await res.json()
-    setLoading(false)
+      const res = await fetch(`/admin/update/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: title.trim(),
+          slug: effectiveSlug,
+          summary: summary.trim(),
+          image: normalizedThumbnail,
+          content: normalizedContent,
+          topic_id: topicId || null,
+          tags: tags,
+          status,
+          contentType,
+        }),
+      })
 
-    if (!res.ok) {
-      alert(data.error || 'حدث خطأ أثناء تحديث المقال')
-      return
+      const data = await res.json()
+      setLoading(false)
+
+      if (!res.ok) {
+        alert(data.error || 'حدث خطأ أثناء تحديث المقال')
+        return
+      }
+
+      setSlug(effectiveSlug)
+      setSlugDraft(effectiveSlug)
+      setSlugEditable(false)
+      setSlugManual(true)
+      setContent(normalizedContent)
+      setThumbnailImage(normalizedThumbnail)
+
+      router.push('/admin/dashboard')
+    } catch (error) {
+      setLoading(false)
+      alert(error instanceof Error ? error.message : 'تعذر الاتصال بالخادم')
     }
-
-    setSlug(effectiveSlug)
-    setSlugDraft(effectiveSlug)
-    setSlugEditable(false)
-    setSlugManual(true)
-
-    router.push('/admin/dashboard')
   }
 
   if (pageLoading) {
     return (
       <main className="admin-page">
         <div className="admin-card wide">
-          <p>جارٍ تحميل المقال...</p>
+          <p>جاري تحميل المقال...</p>
         </div>
       </main>
     )
@@ -342,7 +354,7 @@ export default function EditArticlePage() {
               onClick={() => updateArticle('draft')}
               disabled={loading}
             >
-              {loading ? 'جارٍ الحفظ...' : 'حفظ كمسودة'}
+              {loading ? 'جاري الحفظ...' : 'حفظ كمسودة'}
             </button>
 
             <button
@@ -350,7 +362,7 @@ export default function EditArticlePage() {
               onClick={() => updateArticle('published')}
               disabled={loading}
             >
-              {loading ? 'جارٍ الحفظ...' : 'نشر المقال'}
+              {loading ? 'جاري الحفظ...' : 'نشر المقال'}
             </button>
           </div>
         </div>

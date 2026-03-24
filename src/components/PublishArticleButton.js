@@ -40,7 +40,7 @@ export default function PublishArticleButton({ articleId, disabled = false }) {
       onClick={handlePublish}
       disabled={disabled || loading}
     >
-      {loading ? 'جارٍ النشر...' : 'نشر'}
+      {loading ? 'جاري النشر...' : 'نشر'}
     </button>
   )
 }

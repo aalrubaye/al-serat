@@ -9,6 +9,11 @@ import TagsInput from '../../../components/TagsInput'
 import AdminLogoutButton from '../../../components/AdminLogoutButton'
 import AdminBackLink from '../../../components/AdminBackLink'
 import { toEnglishSlug } from '../../../lib/slugify'
+import {
+  normalizeEditorContentImages,
+  normalizeThumbnailImage,
+  uploadAdminMediaFile,
+} from '../../../lib/adminMediaUpload'
 
 export default function NewArticlePage() {
   const router = useRouter()
@@ -74,17 +79,14 @@ export default function NewArticlePage() {
   async function handleThumbnailFileChange(event) {
     const file = event.target.files?.[0]
     if (!file) return
-
-    const reader = new FileReader()
-
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setThumbnailImage(reader.result)
-      }
-    }
-
-    reader.readAsDataURL(file)
     event.target.value = ''
+
+    try {
+      const uploadedUrl = await uploadAdminMediaFile(file, 'thumbnails')
+      setThumbnailImage(uploadedUrl)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'تعذر رفع الصورة')
+    }
   }
 
   async function saveArticle(status) {
@@ -108,6 +110,9 @@ export default function NewArticlePage() {
     setLoading(true)
 
     try {
+      const normalizedContent = await normalizeEditorContentImages(content)
+      const normalizedThumbnail = await normalizeThumbnailImage(thumbnailImage.trim())
+
       const res = await fetch('/admin/create', {
         method: 'POST',
         headers: {
@@ -117,8 +122,8 @@ export default function NewArticlePage() {
           title,
           slug: effectiveSlug,
           summary,
-          image: thumbnailImage.trim(),
-          content,
+          image: normalizedThumbnail,
+          content: normalizedContent,
           topicId,
           tagsInput: tags.join(', '),
           status,
@@ -138,11 +143,13 @@ export default function NewArticlePage() {
       setSlugDraft(effectiveSlug)
       setSlugEditable(false)
       setSlugManual(true)
+      setContent(normalizedContent)
+      setThumbnailImage(normalizedThumbnail)
 
       router.push('/admin/dashboard')
-    } catch {
+    } catch (error) {
       setLoading(false)
-      alert('تعذر الاتصال بالخادم')
+      alert(error instanceof Error ? error.message : 'تعذر الاتصال بالخادم')
     }
   }
 
@@ -301,7 +308,7 @@ export default function NewArticlePage() {
               onClick={() => saveArticle('draft')}
               disabled={loading}
             >
-              {loading ? 'جارٍ الحفظ...' : 'حفظ كمسودة'}
+              {loading ? 'جاري الحفظ...' : 'حفظ كمسودة'}
             </button>
 
             <button
@@ -309,7 +316,7 @@ export default function NewArticlePage() {
               onClick={() => saveArticle('published')}
               disabled={loading}
             >
-              {loading ? 'جارٍ الحفظ...' : 'نشر المقال'}
+              {loading ? 'جاري الحفظ...' : 'نشر المقال'}
             </button>
           </div>
         </div>

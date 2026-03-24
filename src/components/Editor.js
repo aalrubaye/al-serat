@@ -6,6 +6,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Underline from '@tiptap/extension-underline'
 import Youtube from '@tiptap/extension-youtube'
+import { uploadAdminMediaFile } from '../lib/adminMediaUpload'
 
 const CustomImage = Image.extend({
   addAttributes() {
@@ -85,18 +86,14 @@ export default function Editor({ value, onChange }) {
   async function handleLocalImageChange(e) {
     const file = e.target.files?.[0]
     if (!file || !editor) return
-
-    const reader = new FileReader()
-
-    reader.onload = () => {
-      const src = reader.result
-      if (typeof src === 'string') {
-        editor.chain().focus().setImage({ src, dataSize: 'medium' }).run()
-      }
-    }
-
-    reader.readAsDataURL(file)
     e.target.value = ''
+
+    try {
+      const src = await uploadAdminMediaFile(file, 'content')
+      editor.chain().focus().setImage({ src, dataSize: 'medium' }).run()
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'تعذر رفع الصورة')
+    }
   }
 
   function handleImageLink() {

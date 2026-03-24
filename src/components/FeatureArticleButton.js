@@ -41,7 +41,7 @@ export default function FeatureArticleButton({ articleId, isFeatured = false, di
       disabled={disabled || loading || isFeatured}
       title={isFeatured ? 'هذا هو المقال المميز الحالي' : 'تعيين كمقال مميز'}
     >
-      {loading ? 'جارٍ التحديث...' : isFeatured ? 'مميز حالياً' : 'تمييز المقال'}
+      {loading ? 'جاري التحديث...' : isFeatured ? 'مميز حالياً' : 'تمييز المقال'}
     </button>
   )
 }

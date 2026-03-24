@@ -122,13 +122,13 @@ export default function AdminTopicsPage() {
           />
 
           <button type="submit" disabled={saving}>
-            {saving ? 'جارٍ الحفظ...' : 'إضافة قسم'}
+            {saving ? 'جاري الحفظ...' : 'إضافة قسم'}
           </button>
         </form>
 
         <div className="admin-topics-list">
           {loading ? (
-            <p>جارٍ التحميل...</p>
+            <p>جاري التحميل...</p>
           ) : topics.length ? (
             topics.map((topic) => (
               <div key={topic.id} className="admin-topic-row">

@@ -35,7 +35,7 @@ export default function DeleteArticleButton({ articleId }) {
       onClick={handleDelete}
       disabled={loading}
     >
-      {loading ? 'جارٍ الحذف...' : 'حذف'}
+      {loading ? 'جاري الحذف...' : 'حذف'}
     </button>
   )
 }

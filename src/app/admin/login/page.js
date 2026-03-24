@@ -62,7 +62,7 @@ export default function AdminLoginPage() {
           />
 
           <button type="submit" disabled={loading}>
-            {loading ? 'جارٍ تسجيل الدخول...' : 'دخول'}
+            {loading ? 'جاري تسجيل الدخول...' : 'دخول'}
           </button>
 
           {error && <p className="error-text">{error}</p>}

@@ -26,7 +26,7 @@ export default function AdminLogoutButton() {
       onClick={handleLogout}
       disabled={loading}
     >
-      {loading ? 'جارٍ تسجيل الخروج...' : 'تسجيل الخروج'}
+      {loading ? 'جاري تسجيل الخروج...' : 'تسجيل الخروج'}
     </button>
   )
 }
