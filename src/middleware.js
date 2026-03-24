@@ -12,7 +12,7 @@ function isProtectedAdminPath(pathname) {
   )
 }
 
-export function middleware(request) {
+export async function middleware(request) {
   const { pathname } = request.nextUrl
 
   if (!isProtectedAdminPath(pathname)) {
@@ -20,7 +20,7 @@ export function middleware(request) {
   }
 
   const cookieValue = request.cookies.get(getAdminCookieName())?.value
-  const isValid = verifyAdminSessionValue(cookieValue)
+  const isValid = await verifyAdminSessionValue(cookieValue)
 
   if (isValid) {
     return NextResponse.next()

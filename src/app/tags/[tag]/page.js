@@ -6,6 +6,26 @@ import PublicBackButton from '../../../components/PublicBackButton'
 
 export const dynamic = 'force-dynamic'
 
+function formatArabicNumber(value) {
+  return new Intl.NumberFormat('ar-u-nu-arab').format(value)
+}
+
+function formatPostCountBadge(count) {
+  return `${formatArabicNumber(count)} منشور`
+}
+
+function formatResultsLine(count, query) {
+  if (count === 0) {
+    return 'لا توجد نتائج مطابقة. حاول مع كلمة أو عبارة أخرى.'
+  }
+
+  if (count === 1) {
+    return `نتيجة واحدة عن "${query}".`
+  }
+
+  return `(${formatArabicNumber(count)}) نتائج عن "${query}"`
+}
+
 export default async function TagDetailsPage({ params }) {
   const { tag } = await params
   const decodedTag = decodeURIComponent(tag)
@@ -42,9 +62,16 @@ export default async function TagDetailsPage({ params }) {
               <PublicBackButton fallbackHref="/" />
             </div>
 
-            <div className="topic-page-header">
-              <h1 className="page-title">الوسم: {decodedTag}</h1>
-              <p className="topic-page-count">{enriched.length} عنصر</p>
+            <div className="topic-page-header topic-page-header-stacked">
+              <div className="page-title-with-pill">
+                <h1 className="page-title">الوسم: {decodedTag}</h1>
+                <span className="topic-count-pill">
+                  {formatPostCountBadge(enriched.length)}
+                </span>
+              </div>
+              <p className="topic-page-count">
+                {formatResultsLine(enriched.length, decodedTag)}
+              </p>
             </div>
 
             {enriched.length ? (
@@ -53,9 +80,7 @@ export default async function TagDetailsPage({ params }) {
                   <ArticleCard key={article.id} article={article} compact />
                 ))}
               </div>
-            ) : (
-              <p>لا توجد مقالات مرتبطة بهذا الوسم</p>
-            )}
+            ) : null}
           </div>
         </main>
       </div>

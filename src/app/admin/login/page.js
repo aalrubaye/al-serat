@@ -50,6 +50,7 @@ export default function AdminLoginPage() {
             placeholder="البريد الإلكتروني"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            dir="ltr"
           />
 
           <input
@@ -57,6 +58,7 @@ export default function AdminLoginPage() {
             placeholder="كلمة المرور"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            dir="ltr"
           />
 
           <button type="submit" disabled={loading}>

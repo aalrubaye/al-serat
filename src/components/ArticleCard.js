@@ -110,7 +110,9 @@ export default function ArticleCard({
             />
 
             {article.content_type === 'video' && (
-              <div className="play-icon">▶</div>
+              <div className="play-icon">
+                <span className="play-icon-triangle">▶</span>
+              </div>
             )}
           </div>
         )}

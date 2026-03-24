@@ -6,6 +6,30 @@ import PublicBackButton from '../../components/PublicBackButton'
 
 export const dynamic = 'force-dynamic'
 
+function formatArabicNumber(value) {
+  return new Intl.NumberFormat('ar-u-nu-arab').format(value)
+}
+
+function formatPostCountBadge(count) {
+  return `${formatArabicNumber(count)} منشور`
+}
+
+function formatResultsLine(count, query) {
+  if (!query) {
+    return 'اكتب كلمة أو عبارة للبحث'
+  }
+
+  if (count === 0) {
+    return 'لا توجد نتائج مطابقة. حاول مع كلمة أو عبارة أخرى.'
+  }
+
+  if (count === 1) {
+    return `نتيجة واحدة عن "${query}".`
+  }
+
+  return `(${formatArabicNumber(count)}) نتائج عن "${query}"`
+}
+
 function normalizeSearchText(value) {
   return String(value || '')
     .replace(/<[^>]*>/g, ' ')
@@ -139,34 +163,25 @@ export default async function SearchPage({ searchParams }) {
               <PublicBackButton fallbackHref="/" />
             </div>
 
-            <div className="topic-page-header">
-              <h1 className="page-title">البحث</h1>
-
-              {query ? (
-                <p className="topic-page-count">
-                  {searchResults.length} نتيجة عن &quot;{query}&quot;
-                </p>
-              ) : (
-                <p className="topic-page-count">اكتب كلمة أو عبارة للبحث</p>
-              )}
+            <div className="topic-page-header topic-page-header-stacked">
+              <div className="page-title-with-pill">
+                <h1 className="page-title">البحث</h1>
+                <span className="topic-count-pill">
+                  {formatPostCountBadge(searchResults.length)}
+                </span>
+              </div>
+              <p className="topic-page-count">
+                {formatResultsLine(searchResults.length, query)}
+              </p>
             </div>
 
-            {!query ? (
-              <p className="search-helper-text">
-                استخدم شريط البحث في الأعلى للعثور على المقالات والفيديوهات
-                والوسوم المرتبطة بموضوعك
-              </p>
-            ) : searchResults.length ? (
+            {query && searchResults.length ? (
               <div className="secondary-cards-grid">
                 {searchResults.map((article) => (
                   <ArticleCard key={article.id} article={article} compact />
                 ))}
               </div>
-            ) : (
-              <p className="search-helper-text">
-                لا توجد نتائج مطابقة حالياً. جرّب كلمة مختلفة أو عبارة أقصر.
-              </p>
-            )}
+            ) : null}
           </div>
         </main>
       </div>

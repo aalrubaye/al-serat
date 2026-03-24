@@ -1,5 +1,3 @@
-import { createHmac, timingSafeEqual } from 'crypto'
-
 const ADMIN_COOKIE_NAME = 'al_serat_admin_session'
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7
 
@@ -12,41 +10,85 @@ function getAdminSessionSecret() {
   )
 }
 
-function signValue(value) {
-  return createHmac('sha256', getAdminSessionSecret())
-    .update(value)
-    .digest('base64url')
+function toBase64Url(input) {
+  const bytes = input instanceof Uint8Array ? input : new TextEncoder().encode(input)
+  let binary = ''
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte)
+  }
+
+  return btoa(binary)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '')
 }
 
-export function createAdminSessionValue(email) {
+function fromBase64Url(value) {
+  const normalized = value.replace(/-/g, '+').replace(/_/g, '/')
+  const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4)
+  const binary = atob(padded)
+  const bytes = new Uint8Array(binary.length)
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index)
+  }
+
+  return bytes
+}
+
+async function importSigningKey() {
+  return crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(getAdminSessionSecret()),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign', 'verify']
+  )
+}
+
+async function signValue(value) {
+  const key = await importSigningKey()
+  const signature = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    new TextEncoder().encode(value)
+  )
+
+  return toBase64Url(new Uint8Array(signature))
+}
+
+export async function createAdminSessionValue(email) {
   const payload = JSON.stringify({
     email,
     exp: Date.now() + SESSION_MAX_AGE * 1000,
   })
-  const encoded = Buffer.from(payload).toString('base64url')
-  const signature = signValue(encoded)
+  const encoded = toBase64Url(payload)
+  const signature = await signValue(encoded)
   return `${encoded}.${signature}`
 }
 
-export function verifyAdminSessionValue(value) {
+export async function verifyAdminSessionValue(value) {
   if (!value || !value.includes('.')) return false
 
   const [encoded, signature] = value.split('.')
   if (!encoded || !signature) return false
 
-  const expected = signValue(encoded)
-  const providedBuffer = Buffer.from(signature)
-  const expectedBuffer = Buffer.from(expected)
-
-  if (
-    providedBuffer.length !== expectedBuffer.length ||
-    !timingSafeEqual(providedBuffer, expectedBuffer)
-  ) {
-    return false
-  }
-
   try {
-    const payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'))
+    const key = await importSigningKey()
+    const isValid = await crypto.subtle.verify(
+      'HMAC',
+      key,
+      fromBase64Url(signature),
+      new TextEncoder().encode(encoded)
+    )
+
+    if (!isValid) return false
+
+    const payload = JSON.parse(
+      new TextDecoder().decode(fromBase64Url(encoded))
+    )
+
     return Number(payload?.exp) > Date.now()
   } catch {
     return false

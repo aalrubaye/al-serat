@@ -984,6 +984,12 @@ html[data-theme='dark'] .public-back-button:hover {
   backdrop-filter: blur(4px);
 }
 
+.play-icon-triangle {
+  font-size: 24px;
+  line-height: 1;
+  margin-right: -3px;
+}
+
 .article-card-content {
   padding: 20px 20px 16px;
 }
@@ -2063,6 +2069,13 @@ html[data-theme='dark'] .admin-featured-tag {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 24px;
+}
+
+.topic-page-header-stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
 }
 
 .topic-page-divider {
