@@ -11,8 +11,9 @@ export const dynamic = 'force-dynamic'
 export async function POST(request) {
   try {
     const { email, password } = await request.json()
+    const normalizedEmail = String(email || '').trim().toLowerCase()
 
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return NextResponse.json(
         { error: 'البريد الإلكتروني وكلمة المرور مطلوبان' },
         { status: 400 }
@@ -25,13 +26,23 @@ export async function POST(request) {
     )
 
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: normalizedEmail,
       password,
     })
 
     if (error) {
+      console.error('Admin login failed:', {
+        email: normalizedEmail,
+        message: error.message,
+        code: error.code,
+        status: error.status,
+      })
+
       return NextResponse.json(
-        { error: 'فشل تسجيل الدخول، تأكد من البريد الإلكتروني وكلمة المرور' },
+        {
+          error:
+            error.message || 'فشل تسجيل الدخول، تأكد من البريد الإلكتروني وكلمة المرور',
+        },
         { status: 401 }
       )
     }
@@ -39,7 +50,7 @@ export async function POST(request) {
     const response = NextResponse.json({ ok: true })
     response.cookies.set({
       name: getAdminCookieName(),
-      value: await createAdminSessionValue(email),
+      value: await createAdminSessionValue(normalizedEmail),
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
