@@ -28,24 +28,39 @@ export default function BookmarksPage() {
         return
       }
 
-      const response = await fetch('/api/bookmarks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ids, bookSlugs }),
-      })
+      const [articlesResponse, booksResponse] = await Promise.all([
+        ids.length
+          ? fetch('/api/bookmarks', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ ids }),
+            })
+          : Promise.resolve(null),
+        bookSlugs.length ? fetch('/books/manifest.json') : Promise.resolve(null),
+      ])
 
-      if (!response.ok) {
-        setArticles([])
-        setBooks([])
-        setLoading(false)
-        return
+      let nextArticles = []
+      if (articlesResponse?.ok) {
+        const payload = await articlesResponse.json()
+        nextArticles = Array.isArray(payload.articles) ? payload.articles : []
       }
 
-      const payload = await response.json()
-      setArticles(Array.isArray(payload.articles) ? payload.articles : [])
-      setBooks(Array.isArray(payload.books) ? payload.books : [])
+      let nextBooks = []
+      if (booksResponse?.ok) {
+        const manifest = await booksResponse.json()
+        const booksBySlug = new Map(
+          (Array.isArray(manifest) ? manifest : []).map((book) => [book.slug, book])
+        )
+
+        nextBooks = bookSlugs
+          .map((slug) => booksBySlug.get(slug))
+          .filter(Boolean)
+      }
+
+      setArticles(nextArticles)
+      setBooks(nextBooks)
       setLoading(false)
     }
 

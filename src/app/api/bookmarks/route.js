@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
-import { getAllBooks } from '../../../lib/books'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,15 +9,12 @@ export async function POST(request) {
     const ids = Array.isArray(body?.ids)
       ? body.ids.map((id) => String(id || '').trim()).filter(Boolean)
       : []
-    const bookSlugs = Array.isArray(body?.bookSlugs)
-      ? body.bookSlugs.map((slug) => String(slug || '').trim()).filter(Boolean)
-      : []
 
-    if (!ids.length && !bookSlugs.length) {
-      return NextResponse.json({ articles: [], books: [] })
+    if (!ids.length) {
+      return NextResponse.json({ articles: [] })
     }
 
-    const [{ data: topics, error: topicsError }, { data: articles, error: articlesError }, allBooks] =
+    const [{ data: topics, error: topicsError }, { data: articles, error: articlesError }] =
       await Promise.all([
         supabaseAdmin.from('topics').select('id, name'),
         supabaseAdmin
@@ -27,7 +23,6 @@ export async function POST(request) {
           .in('id', ids)
           .eq('status', 'published')
           .order('created_at', { ascending: false }),
-        bookSlugs.length ? getAllBooks() : Promise.resolve([]),
       ])
 
     if (topicsError || articlesError) {
@@ -48,13 +43,7 @@ export async function POST(request) {
       topic_name: topicMap[article.topic_id] || '',
     }))
 
-    const books = (allBooks || []).filter((book) => bookSlugs.includes(book.slug))
-
-    const orderedBooks = bookSlugs
-      .map((slug) => books.find((book) => book.slug === slug))
-      .filter(Boolean)
-
-    return NextResponse.json({ articles: enriched, books: orderedBooks })
+    return NextResponse.json({ articles: enriched })
   } catch {
     return NextResponse.json(
       { error: 'Invalid bookmarks request' },
