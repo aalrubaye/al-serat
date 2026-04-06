@@ -18,6 +18,7 @@ function SidebarContent() {
       active: pathname === '/topics' || pathname.startsWith('/topics/'),
     },
     { href: '/bookmarks', label: 'المفضلة', active: pathname === '/bookmarks' },
+    { href: '/books', label: 'المكتبة', active: pathname === '/books' || pathname.startsWith('/books/') },
     { href: '/about', label: 'عن الصراط', active: pathname === '/about' },
     { href: '/contact', label: 'اتصل بنا', active: pathname === '/contact' },
   ]

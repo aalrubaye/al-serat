@@ -22,23 +22,42 @@ function sanitizeFileName(name) {
 }
 
 export async function uploadAdminMediaFile(file, folder = 'content') {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('folder', folder)
-  formData.append('bucket', ADMIN_MEDIA_BUCKET)
-
-  const response = await fetch('/api/admin/upload', {
+  const signedResponse = await fetch('/api/admin/upload', {
     method: 'POST',
-    body: formData,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      fileName: file.name,
+      contentType: file.type,
+      folder,
+      bucket: ADMIN_MEDIA_BUCKET,
+    }),
   })
 
-  const data = await response.json().catch(() => ({}))
+  const signedData = await signedResponse.json().catch(() => ({}))
 
-  if (!response.ok || !data.url) {
-    throw new Error(data.error || 'تعذر رفع الصورة')
+  if (!signedResponse.ok || !signedData.token || !signedData.path) {
+    throw new Error(signedData.error || 'تعذر تجهيز رفع الصورة')
   }
 
-  return data.url
+  const { supabase } = await import('./supabase')
+  const { error: uploadError } = await supabase.storage
+    .from(signedData.bucket || ADMIN_MEDIA_BUCKET)
+    .uploadToSignedUrl(signedData.path, signedData.token, file, {
+      contentType: file.type || 'image/jpeg',
+      upsert: false,
+    })
+
+  if (uploadError) {
+    throw new Error(uploadError.message || 'تعذر رفع الصورة')
+  }
+
+  if (!signedData.url) {
+    throw new Error('تعذر الحصول على رابط الصورة')
+  }
+
+  return signedData.url
 }
 
 export function dataUrlToFile(dataUrl, name = 'image') {

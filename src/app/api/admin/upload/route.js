@@ -44,39 +44,44 @@ function sanitizeFolder(folder) {
 
 export async function POST(request) {
   try {
-    const formData = await request.formData()
-    const file = formData.get('file')
-    const bucket = String(formData.get('bucket') || 'article-media')
-    const folder = sanitizeFolder(formData.get('folder'))
-
-    if (!(file instanceof File)) {
-      return NextResponse.json({ error: 'لم يتم استلام ملف صالح' }, { status: 400 })
-    }
+    const body = await request.json()
+    const bucket = String(body.bucket || 'article-media')
+    const folder = sanitizeFolder(body.folder)
+    const fileName = String(body.fileName || 'image')
+    const contentType = String(body.contentType || 'image/jpeg')
 
     await ensureBucketExists(bucket)
 
-    const extension = getSafeExtension(file)
-    const path = `${folder}/${Date.now()}-${randomUUID()}.${extension}`
-    const buffer = Buffer.from(await file.arrayBuffer())
+    const extension = getSafeExtension(contentType)
+    const safeBaseName = fileName
+      .replace(/\.[^.]+$/, '')
+      .replace(/[^a-zA-Z0-9_-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .toLowerCase() || 'image'
+    const path = `${folder}/${Date.now()}-${safeBaseName}-${randomUUID()}.${extension}`
 
-    const { error: uploadError } = await supabaseAdmin.storage
+    const { data: signedData, error: signedError } = await supabaseAdmin.storage
       .from(bucket)
-      .upload(path, buffer, {
-        contentType: file.type || 'image/jpeg',
+      .createSignedUploadUrl(path, {
         upsert: false,
       })
 
-    if (uploadError) {
-      return NextResponse.json({ error: uploadError.message }, { status: 500 })
+    if (signedError || !signedData?.token) {
+      return NextResponse.json(
+        { error: signedError?.message || 'تعذر إنشاء رابط الرفع' },
+        { status: 500 }
+      )
     }
 
     const { data } = supabaseAdmin.storage.from(bucket).getPublicUrl(path)
 
     return NextResponse.json({
       ok: true,
+      token: signedData.token,
       url: data.publicUrl,
       path,
       bucket,
+      contentType,
     })
   } catch (error) {
     return NextResponse.json(

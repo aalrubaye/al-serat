@@ -221,6 +221,17 @@ export default async function ArticlePage({ params }) {
             </div>
 
             <article className="article-full">
+              <div className="article-print-brand" aria-hidden="true">
+                <div className="article-print-brand-inner">
+                  <img
+                    src="/icon.png"
+                    alt="شعار الصراط"
+                    className="article-print-brand-logo"
+                  />
+                  <span className="article-print-brand-title">الصراط</span>
+                </div>
+              </div>
+
               <div className="article-detail-topbar">
                 <div className="article-meta article-detail-dates">
                   <span>{formatHijriDate(article.created_at)}</span>
