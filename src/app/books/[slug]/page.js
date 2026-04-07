@@ -6,29 +6,9 @@ import Link from 'next/link'
 import BookFavoriteButton from '../../../components/BookFavoriteButton'
 import PrintButton from '../../../components/PrintButton'
 import ShareMenuButton from '../../../components/ShareMenuButton'
+import BookSuggestions from '../../../components/BookSuggestions'
 
 export const dynamic = 'force-static'
-
-function getSuggestedBooks(books, currentBook, limit = 2) {
-  const candidates = books.filter((candidate) => candidate.slug !== currentBook.slug)
-
-  if (candidates.length <= limit) {
-    return candidates
-  }
-
-  const seed = Array.from(currentBook.slug).reduce(
-    (total, char, index) => total + char.charCodeAt(0) * (index + 1),
-    0
-  )
-
-  const ranked = [...candidates].sort((left, right) => {
-    const leftScore = (left.number * 97 + seed) % 997
-    const rightScore = (right.number * 97 + seed) % 997
-    return leftScore - rightScore
-  })
-
-  return ranked.slice(0, limit)
-}
 
 export async function generateStaticParams() {
   const books = await getAllBooks()
@@ -78,8 +58,6 @@ export default async function BookDetailPage({ params }) {
       </div>
     )
   }
-
-  const suggestedBooks = getSuggestedBooks(books, book)
 
   return (
     <div>
@@ -163,48 +141,10 @@ export default async function BookDetailPage({ params }) {
                 </div>
               </section>
 
-              {suggestedBooks.length > 0 && (
+              {books.length > 1 && (
                 <>
                   <div className="topic-page-divider book-detail-divider" />
-
-                  <section className="book-suggestions-section" aria-label="كتب مقترحة">
-                    <div className="topic-page-header topic-page-header-stacked book-suggestions-header">
-                      <h2 className="page-title book-suggestions-title">اقرأ أيضاً</h2>
-                    </div>
-
-                    <div className="book-suggestions-grid">
-                      {suggestedBooks.map((suggestedBook) => (
-                        <article key={suggestedBook.slug} className="book-suggestion-card">
-                          <Link
-                            href={`/books/${suggestedBook.slug}`}
-                            className="book-suggestion-cover-link"
-                          >
-                            <img
-                              src={suggestedBook.coverSrc}
-                              alt={`غلاف كتاب ${suggestedBook.title}`}
-                              className="book-suggestion-cover"
-                            />
-                          </Link>
-
-                          <div className="book-suggestion-copy">
-                            <h3 className="book-suggestion-title">{suggestedBook.title}</h3>
-                            <p className="book-suggestion-summary">
-                              {suggestedBook.executiveSummary}
-                            </p>
-
-                            <div className="book-detail-actions book-suggestion-actions">
-                              <Link
-                                href={`/books/${suggestedBook.slug}`}
-                                className="book-card-secondary-action"
-                              >
-                                عرض التفاصيل
-                              </Link>
-                            </div>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-                  </section>
+                  <BookSuggestions books={books} currentSlug={book.slug} />
                 </>
               )}
             </article>

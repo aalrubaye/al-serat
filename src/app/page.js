@@ -7,7 +7,7 @@ import LoadMoreArticleGrid from '../components/LoadMoreArticleGrid'
 export const dynamic = 'force-dynamic'
 
 const FEATURED_TAG = '__featured__'
-const HOME_FILTER_LIMIT = 10
+const HOME_FILTER_LIMIT = 11
 const HOME_FETCH_LIMIT = 60
 
 function normalizeHomeFilter(value) {
